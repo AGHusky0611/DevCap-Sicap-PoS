@@ -177,6 +177,39 @@ input:checked + .slider:before {
 
 .product-details {
     margin-top: auto;
+    position: relative; /* This is required to position the animation correctly */
+}
+
+/* Styles for the new jumping text animation */
+.added-feedback {
+    position: absolute;
+    bottom: 50px; /* Start position right above the button */
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: #28a745;
+    color: white;
+    padding: 4px 10px;
+    border-radius: 4px;
+    font-size: 0.9em;
+    font-weight: bold;
+    opacity: 0; /* Hidden by default */
+    pointer-events: none; /* The text can't be clicked */
+    white-space: nowrap;
+}
+
+.added-feedback.animate {
+    animation: jumpUpFadeOut 1.5s ease-out forwards;
+}
+
+@keyframes jumpUpFadeOut {
+    0% {
+        opacity: 1;
+        transform: translate(-50%, 0);
+    }
+    100% {
+        opacity: 0;
+        transform: translate(-50%, -25px); /* Final position (moved up) */
+    }
 }
 
 .product-price {
@@ -200,6 +233,11 @@ input:checked + .slider:before {
 
 .add-to-cart-btn:hover {
     background-color: var(--primary-hover);
+}
+
+.add-to-cart-btn.added {
+    background-color: #28a745; /* Success Green */
+    cursor: default;
 }
 
 /* --- Cart Panel --- */

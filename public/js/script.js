@@ -82,15 +82,47 @@ async function renderProducts() {
 
 productListEl.addEventListener('click', (e) => {
     if (e.target.classList.contains('add-to-cart-btn')) {
-        const productCard = e.target.closest('.product-card'); // Updated from .product-row
+        const button = e.target;
+        
+        // Prevent re-clicking while in "Added" state
+        if (button.classList.contains('added')) {
+            return;
+        }
+
+        const productCard = button.closest('.product-card');
         const productName = productCard.querySelector('.product-name').innerText;
         const productPrice = parseFloat(productCard.querySelector('.product-price').innerText.replace('₱', ''));
+        
+        // Add item to cart
         cart.push({ name: productName, price: productPrice });
         updateCartCount();
-        if (cartPanel.getAttribute('aria-hidden') === 'false') renderCart();
+        if (cartPanel.getAttribute('aria-hidden') === 'false') {
+            renderCart();
+        }
         
-        openCartBtn.classList.add('item-added');
-        setTimeout(() => openCartBtn.classList.remove('item-added'), 500);
+        // --- NEW ANIMATION LOGIC ---
+
+        // 1. Create the feedback element
+        const feedbackEl = document.createElement('div');
+        feedbackEl.innerText = 'Added!';
+        feedbackEl.className = 'added-feedback animate';
+
+        // 2. Append it to the product details container
+        const productDetails = button.closest('.product-details');
+        if (productDetails) {
+            productDetails.appendChild(feedbackEl);
+        }
+
+        // 3. Change button color and prevent re-clicking
+        button.classList.add('added');
+
+        // 4. Revert button and remove the feedback element after animation
+        setTimeout(() => {
+            button.classList.remove('added');
+            if (feedbackEl) {
+                feedbackEl.remove();
+            }
+        }, 1500);
     }
 });
 
@@ -143,8 +175,9 @@ cartBody.addEventListener('click', (e) => {
     const { name, price: priceStr } = button.dataset;
     if (!name) return;
     const price = parseFloat(priceStr);
-    if (button.classList.contains('increase-btn')) cart.push({ name, price });
-    else if (button.classList.contains('decrease-btn')) {
+    if (button.classList.contains('increase-btn')) {
+        cart.push({ name, price });
+    } else if (button.classList.contains('decrease-btn')) {
         const idx = cart.findIndex(i => i.name === name && i.price === price);
         if (idx !== -1) cart.splice(idx, 1);
     } else if (button.classList.contains('remove-btn')) {
@@ -173,7 +206,6 @@ closeCartBtn.addEventListener('click', closeCart);
 overlay.addEventListener('click', closeCart);
 
 // --- Checkout & Reporting Logic ---
-
 checkoutBtn.addEventListener('click', async () => {
     const officerName = officerNameInput.value.trim();
 
