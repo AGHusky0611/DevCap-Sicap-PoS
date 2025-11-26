@@ -1,3 +1,28 @@
+// --- Theme Toggle Logic ---
+const themeToggleCheckbox = document.getElementById('theme-toggle-checkbox');
+
+// Function to apply the theme
+const applyTheme = (theme) => {
+    document.body.classList.toggle('dark-mode', theme === 'dark');
+    if (themeToggleCheckbox) {
+        themeToggleCheckbox.checked = theme === 'dark';
+    }
+};
+
+// Add change listener to the checkbox
+if (themeToggleCheckbox) {
+    themeToggleCheckbox.addEventListener('change', () => {
+        const newTheme = themeToggleCheckbox.checked ? 'dark' : 'light';
+        localStorage.setItem('theme', newTheme);
+        applyTheme(newTheme);
+    });
+}
+
+// Apply the saved theme on initial load
+const savedTheme = localStorage.getItem('theme') || 'light';
+applyTheme(savedTheme);
+
+
 // 1. Import the functions you need from the SDKs
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
@@ -30,7 +55,10 @@ const cartBody = document.getElementById('cart-body');
 const cartTotalEl = document.getElementById('cart-total');
 const checkoutBtn = document.getElementById('checkout-btn');
 const overlay = document.getElementById('overlay');
-// Note: Admin panel and download button are no longer managed here
+const officerNameInput = document.getElementById('officer-name');
+const officerError = document.getElementById('officer-error');
+const downloadReportBtn = document.getElementById('download-report-btn');
+
 
 // --- Product Display ---
 
@@ -41,9 +69,9 @@ async function renderProducts() {
     productSnapshot.forEach(doc => {
         const product = doc.data();
         const productEl = document.createElement('div');
-        productEl.className = 'product-row';
+        productEl.className = 'product-card'; // Using new class for styling
         productEl.innerHTML = `
-            <div class="product-image-placeholder"><img src="${product.imageUrl}" alt="${product.name}"></div>
+            <img src="${product.imageUrl}" alt="${product.name}">
             <div class="product-name">${product.name}</div>
             <div class="product-details">
                 <div class="product-price">₱${Number(product.price).toFixed(2)}</div>
@@ -56,19 +84,19 @@ async function renderProducts() {
 
 productListEl.addEventListener('click', (e) => {
     if (e.target.classList.contains('add-to-cart-btn')) {
-        const productRow = e.target.closest('.product-row');
-        const productName = productRow.querySelector('.product-name').innerText;
-        const productPrice = parseFloat(productRow.querySelector('.product-price').innerText.replace('₱', ''));
+        const productCard = e.target.closest('.product-card'); // Updated from .product-row
+        const productName = productCard.querySelector('.product-name').innerText;
+        const productPrice = parseFloat(productCard.querySelector('.product-price').innerText.replace('₱', ''));
         cart.push({ name: productName, price: productPrice });
         updateCartCount();
-        if (cartPanel.classList.contains('open')) renderCart();
+        if (cartPanel.getAttribute('aria-hidden') === 'false') renderCart();
         
         openCartBtn.classList.add('item-added');
         setTimeout(() => openCartBtn.classList.remove('item-added'), 500);
     }
 });
 
-// --- Cart Logic (Unchanged) ---
+// --- Cart Logic ---
 function updateCartCount() { cartCountEl.innerText = cart.length; }
 
 function aggregateCart() {
@@ -92,7 +120,21 @@ function renderCart() {
     items.forEach(item => {
         const itemEl = document.createElement('div');
         itemEl.className = 'cart-item';
-        itemEl.innerHTML = `<div class="left"><div style="font-weight:600">${item.name}</div><div style="color:var(--gray); font-size:0.9em">₱${item.price.toFixed(2)}</div><button class="remove-btn" data-name="${item.name}" data-price="${item.price}">Remove</button></div><div style="display:flex;align-items:center;gap:15px"><div class="qty-controls"><button class="decrease-btn" data-name="${item.name}" data-price="${item.price}">-</button><span>${item.qty}</span><button class="increase-btn" data-name="${item.name}" data-price="${item.price}">+</button></div><div style="font-weight:600;min-width:70px;text-align:right">₱${item.subtotal.toFixed(2)}</div></div>`;
+        itemEl.innerHTML = `
+            <div class="item-info">
+                <div class="item-name">${item.name}</div>
+                <div class="item-price">₱${item.price.toFixed(2)} each</div>
+            </div>
+            <div class="item-controls">
+                <div class="qty-controls">
+                    <button class="decrease-btn" data-name="${item.name}" data-price="${item.price}">-</button>
+                    <span class="qty">${item.qty}</span>
+                    <button class="increase-btn" data-name="${item.name}" data-price="${item.price}">+</button>
+                </div>
+                <div class="item-subtotal">₱${item.subtotal.toFixed(2)}</div>
+                <button class="remove-btn" title="Remove all ${item.name}" data-name="${item.name}" data-price="${item.price}">&times;</button>
+            </div>
+        `;
         cartBody.appendChild(itemEl);
     });
     cartTotalEl.innerText = `₱${items.reduce((s, it) => s + it.subtotal, 0).toFixed(2)}`;
@@ -114,48 +156,72 @@ cartBody.addEventListener('click', (e) => {
     renderCart();
 });
 
-const openCart = () => { cartPanel.classList.add('open'); overlay.classList.add('visible'); renderCart(); };
-const closeCart = () => { cartPanel.classList.remove('open'); overlay.classList.remove('visible'); };
+// Updated Cart UI functions to be more accessible
+const openCart = () => {
+    cartPanel.setAttribute('aria-hidden', 'false');
+    overlay.classList.add('visible');
+    renderCart();
+    officerError.setAttribute('aria-hidden', 'true'); // Hide error on open
+    setTimeout(() => officerNameInput.focus(), 300); // Focus for quick entry
+};
+
+const closeCart = () => {
+    cartPanel.setAttribute('aria-hidden', 'true');
+    overlay.classList.remove('visible');
+};
+
 openCartBtn.addEventListener('click', openCart);
 closeCartBtn.addEventListener('click', closeCart);
 overlay.addEventListener('click', closeCart);
 
 // --- Checkout & Reporting Logic ---
 
-// The user has attached a file, but it is empty.
-// I will assume the user wants the previous checkout and reporting logic.
-const downloadReportBtn = document.getElementById('download-report-btn');
-
 checkoutBtn.addEventListener('click', () => {
+    const officerName = officerNameInput.value.trim();
+
+    // 1. Validate Officer Name
+    if (!officerName) {
+        officerError.setAttribute('aria-hidden', 'false');
+        officerNameInput.focus();
+        return; // Stop the checkout
+    }
+    officerError.setAttribute('aria-hidden', 'true');
+
+    // 2. Validate Cart
     if (cart.length === 0) {
         alert('Your cart is empty.');
         return;
     }
 
+    // 3. Record Purchase with Officer Name
     const purchaseDate = new Date().toLocaleString();
     for (const item of cart) {
         allPurchases.push({
             date: purchaseDate,
             name: item.name,
-            price: item.price
+            price: item.price,
+            officer: officerName // Add officer name to each purchased item
         });
     }
 
-    alert('Purchase successful! It has been recorded for the next sales report.');
+    // 4. Finalize
+    alert(`Purchase successful for officer: ${officerName}! It has been recorded for the next sales report.`);
     cart = [];
+    officerNameInput.value = ''; // Clear officer name after checkout
     updateCartCount();
     closeCart();
 });
 
+// Update Report Download to include officer name
 if (downloadReportBtn) {
     downloadReportBtn.addEventListener('click', () => {
-        if (allPurchaces.length === 0) {
+        if (allPurchases.length === 0) { // Corrected typo from source
             alert('There are no sales to report.');
             return;
         }
     
-        const headers = "Date,Product Name,Product Price\n";
-        const rows = allPurchases.map(p => `"${p.date}","${p.name}",${p.price.toFixed(2)}`).join('\n');
+        const headers = "Date,Product Name,Product Price,Officer\n"; // Added Officer header
+        const rows = allPurchases.map(p => `"${p.date}","${p.name}",${p.price.toFixed(2)},"${p.officer}"`).join('\n'); // Added officer to row
         const csvContent = headers + rows;
     
         const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
