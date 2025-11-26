@@ -1,5 +1,5 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { getFirestore, collection, getDocs, addDoc, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+import { getFirestore, collection, getDocs, addDoc, deleteDoc, doc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
 // --- Theme Toggle Logic ---
 const themeToggleCheckbox = document.getElementById('theme-toggle-checkbox');
@@ -37,6 +37,11 @@ const adminProductList = document.getElementById('admin-product-list');
 const downloadDbBtn = document.getElementById('download-db-btn');
 const downloadSalesBtn = document.getElementById('download-sales-btn');
 
+// Edit Modal Elements
+const editModalOverlay = document.getElementById('edit-modal-overlay');
+const editProductForm = document.getElementById('edit-product-form');
+const cancelEditBtn = document.getElementById('cancel-edit-btn');
+
 // --- Render Products in Admin List ---
 const renderAdminProducts = async () => {
     adminProductList.innerHTML = 'Loading products...';
@@ -54,7 +59,10 @@ const renderAdminProducts = async () => {
             productEl.innerHTML = `
                 <div class="product-name">${product.name}</div>
                 <div class="product-price">₱${Number(product.price).toFixed(2)}</div>
-                <button class="delete-btn" data-id="${doc.id}">Delete</button>
+                <div class="product-actions">
+                    <button class="edit-btn" data-id="${doc.id}">Edit</button>
+                    <button class="delete-btn" data-id="${doc.id}">Delete</button>
+                </div>
             `;
             adminProductList.appendChild(productEl);
         });
@@ -86,10 +94,40 @@ addProductForm.addEventListener('submit', async (e) => {
     }
 });
 
-// --- Delete a Product ---
+// --- Open and Handle Edit Modal ---
+const openEditModal = async (productId) => {
+    try {
+        const productRef = doc(db, 'products', productId);
+        const productSnap = await getDoc(productRef);
+        if (productSnap.exists()) {
+            const product = productSnap.data();
+            document.getElementById('edit-product-id').value = productId;
+            document.getElementById('edit-product-name').value = product.name;
+            document.getElementById('edit-product-price').value = product.price;
+            document.getElementById('edit-product-image').value = product.imageUrl;
+            editModalOverlay.style.display = 'flex';
+        } else {
+            alert('Product not found.');
+        }
+    } catch (error) {
+        console.error("Error fetching product for edit: ", error);
+    }
+};
+
+const closeEditModal = () => {
+    editModalOverlay.style.display = 'none';
+};
+
+// --- Click Listeners for Edit/Delete ---
 adminProductList.addEventListener('click', async (e) => {
-    if (e.target.classList.contains('delete-btn')) {
-        const productId = e.target.dataset.id;
+    const button = e.target;
+    const productId = button.dataset.id;
+
+    if (button.classList.contains('edit-btn')) {
+        openEditModal(productId);
+    }
+    
+    if (button.classList.contains('delete-btn')) {
         if (confirm('Are you sure you want to delete this product?')) {
             try {
                 await deleteDoc(doc(db, 'products', productId));
@@ -99,6 +137,33 @@ adminProductList.addEventListener('click', async (e) => {
                 alert('Failed to delete product.');
             }
         }
+    }
+});
+
+// --- Edit Form Submission and Modal Closing ---
+editProductForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const productId = document.getElementById('edit-product-id').value;
+    const productRef = doc(db, 'products', productId);
+
+    try {
+        await updateDoc(productRef, {
+            name: document.getElementById('edit-product-name').value,
+            price: parseFloat(document.getElementById('edit-product-price').value),
+            imageUrl: document.getElementById('edit-product-image').value
+        });
+        closeEditModal();
+        await renderAdminProducts();
+    } catch (error) {
+        console.error("Error updating product: ", error);
+        alert('Failed to update product.');
+    }
+});
+
+cancelEditBtn.addEventListener('click', closeEditModal);
+editModalOverlay.addEventListener('click', (e) => {
+    if (e.target === editModalOverlay) {
+        closeEditModal();
     }
 });
 
