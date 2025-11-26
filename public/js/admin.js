@@ -143,14 +143,13 @@ downloadSalesBtn.addEventListener('click', async () => {
             return;
         }
 
-        let csvContent = "Transaction ID,Timestamp,Officer,Item Name,Quantity,Item Price,Subtotal,Transaction Total\n";
+        let csvContent = "Transaction ID,Timestamp,Officer,Item Name,Quantity,Item Price,Subtotal\n";
 
         salesSnapshot.forEach(doc => {
             const sale = doc.data();
             const transactionId = doc.id;
             const timestamp = sale.createdAt?.toDate().toLocaleString() || 'N/A';
             const officer = sale.officerName;
-            const total = sale.totalAmount.toFixed(2);
             
             // Each transaction can have multiple items, so we create a row for each item
             sale.items.forEach(item => {
@@ -161,8 +160,7 @@ downloadSalesBtn.addEventListener('click', async () => {
                     `"${item.name.replace(/"/g, '""')}"`,
                     item.qty,
                     item.price.toFixed(2),
-                    item.subtotal.toFixed(2),
-                    total
+                    item.subtotal.toFixed(2)
                 ].join(',');
                 csvContent += row + "\n";
             });
