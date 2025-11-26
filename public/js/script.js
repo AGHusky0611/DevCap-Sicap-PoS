@@ -1,3 +1,23 @@
+// 1. Import the functions you need from the SDKs
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+// 2. Your web app's Firebase configuration
+const firebaseConfig = {
+    apiKey: "AIzaSyDP_TDz3lPQUoNg-I-1JFUokrVTTthhc58",
+    authDomain: "devcap-pos-sicap.firebaseapp.com",
+    projectId: "devcap-pos-sicap",
+    storageBucket: "devcap-pos-sicap.appspot.com",
+    messagingSenderId: "303088109012",
+    appId: "1:303088109012:web:5a97e12adcfa6b9285c241"
+};
+
+// 3. Initialize Firebase and Firestore
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+// --- Your existing application code starts here ---
+
 let cart = [];
 
 const addToCartButtons = document.querySelectorAll('.add-to-cart-btn');
@@ -88,7 +108,6 @@ addToCartButtons.forEach(button => {
         cart.push({ name: productName, price: productPrice });
         updateCartCount();
 
-        // Show "Added!" notification
         const existingNotification = productRow.querySelector('.add-notification');
         if (existingNotification) existingNotification.remove();
 
@@ -97,10 +116,9 @@ addToCartButtons.forEach(button => {
         notification.innerText = 'Added!';
         productRow.appendChild(notification);
 
-        // Remove the notification after the animation ends
         setTimeout(() => {
             notification.remove();
-        }, 1500); // This duration should match the animation duration
+        }, 1500);
 
         openCartBtn.classList.add('item-added');
         setTimeout(() => openCartBtn.classList.remove('item-added'), 500);
@@ -124,7 +142,8 @@ openCartBtn.addEventListener('click', openCart);
 closeCartBtn.addEventListener('click', closeCart);
 overlay.addEventListener('click', closeCart);
 
-checkoutBtn.addEventListener('click', () => {
+// --- 4. UPDATED CHECKOUT FUNCTION ---
+checkoutBtn.addEventListener('click', async () => { // Make the function async
     if (cart.length === 0) {
         alert('Your cart is empty.');
         return;
@@ -132,28 +151,25 @@ checkoutBtn.addEventListener('click', () => {
 
     const total = aggregateCart().reduce((sum, item) => sum + item.subtotal, 0);
 
-    // Create a purchase record object
     const purchaseRecord = {
         items: cart,
         totalAmount: total,
-        purchaseDate: new Date() // Firebase will convert this to a timestamp
+        purchaseDate: serverTimestamp() // Use server timestamp for accuracy
     };
 
-    // Add a new document with a generated ID to the "purchases" collection
-    db.collection("purchases").add(purchaseRecord)
-        .then((docRef) => {
-            console.log("Document written with ID: ", docRef.id);
-            alert('Purchase successful! Your order has been recorded.');
+    try {
+        // Use the new addDoc and collection functions
+        const docRef = await addDoc(collection(db, "purchases"), purchaseRecord);
+        console.log("Document written with ID: ", docRef.id);
+        alert('Purchase successful! Your order has been recorded.');
 
-            // Clear cart and update UI on success
-            cart = [];
-            updateCartCount();
-            closeCart();
-        })
-        .catch((error) => {
-            console.error("Error adding document: ", error);
-            alert('There was an error saving your purchase. Please try again.');
-        });
+        cart = [];
+        updateCartCount();
+        closeCart();
+    } catch (error) {
+        console.error("Error adding document: ", error);
+        alert('There was an error saving your purchase. Please try again.');
+    }
 });
 
 updateCartCount();

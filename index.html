@@ -88,27 +88,8 @@
 
     <div class="overlay" id="overlay"></div>
 
-    <!-- Use the "compat" libraries to match your script.js -->
-    <script src="https://www.gstatic.com/firebasejs/9.6.7/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.7/firebase-firestore-compat.js"></script>
+    <!-- Load script.js as a module -->
+    <script type="module" src="public/js/script.js"></script>
 
-    <script>
-      // Your web app's Firebase configuration
-      const firebaseConfig = {
-        apiKey: "AIzaSyDP_TDz3lPQUoNg-I-1JFUokrVTTthhc58",
-        authDomain: "devcap-pos-sicap.firebaseapp.com",
-        projectId: "devcap-pos-sicap",
-        storageBucket: "devcap-pos-sicap.appspot.com",
-        messagingSenderId: "303088109012",
-        appId: "1:303088109012:web:5a97e12adcfa6b9285c241"
-      };
-
-      // Initialize Firebase
-      firebase.initializeApp(firebaseConfig);
-      // Create the global 'db' variable so script.js can access it
-      db = firebase.firestore();
-    </script>
-
-    <script src="public/js/script.js"></script>
 </body>
 </html>
