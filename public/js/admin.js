@@ -143,20 +143,21 @@ downloadSalesBtn.addEventListener('click', async () => {
             return;
         }
 
+        // The header row for the CSV file already includes "Officer"
         let csvContent = "Transaction ID,Timestamp,Officer,Item Name,Quantity,Item Price,Subtotal\n";
 
         salesSnapshot.forEach(doc => {
             const sale = doc.data();
             const transactionId = doc.id;
             const timestamp = sale.createdAt?.toDate().toLocaleString() || 'N/A';
-            const officer = sale.officerName;
+            const officer = sale.officerName; 
             
             // Each transaction can have multiple items, so we create a row for each item
             sale.items.forEach(item => {
                 const row = [
                     `"${transactionId}"`,
                     `"${timestamp}"`,
-                    `"${officer}"`,
+                    `"${officer}"`, // And it's added to each row of the report
                     `"${item.name.replace(/"/g, '""')}"`,
                     item.qty,
                     item.price.toFixed(2),
