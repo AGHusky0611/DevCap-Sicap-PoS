@@ -4,13 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SICAP Aloha</title>
-    <!-- Path updated to point into the public folder -->
     <link rel="stylesheet" href="public/css/style.css">
 </head>
 <body>
     <header>
         <div class="logo">
-            <!-- Path updated to remove ../ -->
             <img src="res/SICAP.png" alt="SicapLogo" style="max-width: 100%; max-height: 100%;">
         </div>
         <h1>SICAP Aloha</h1>
@@ -90,27 +88,27 @@
 
     <div class="overlay" id="overlay"></div>
 
-    <!-- Firebase SDKs -->
+    <!-- Use the "compat" libraries to match your script.js -->
     <script src="https://www.gstatic.com/firebasejs/9.6.7/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.7/firebase-firestore-compat.js"></script>
 
     <script>
       // Your web app's Firebase configuration
       const firebaseConfig = {
-        apiKey: "YOUR_API_KEY",
-        authDomain: "YOUR_AUTH_DOMAIN",
-        projectId: "YOUR_PROJECT_ID",
-        storageBucket: "YOUR_STORAGE_BUCKET",
-        messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-        appId: "YOUR_APP_ID"
+        apiKey: "AIzaSyDP_TDz3lPQUoNg-I-1JFUokrVTTthhc58",
+        authDomain: "devcap-pos-sicap.firebaseapp.com",
+        projectId: "devcap-pos-sicap",
+        storageBucket: "devcap-pos-sicap.appspot.com", // Corrected storage bucket name
+        messagingSenderId: "303088109012",
+        appId: "1:303088109012:web:5a97e12adcfa6b9285c241"
       };
 
       // Initialize Firebase
       firebase.initializeApp(firebaseConfig);
+      // Create the global 'db' variable that script.js needs
       const db = firebase.firestore();
     </script>
 
-    <!-- Path updated to point into the public folder -->
     <script src="public/js/script.js"></script>
 </body>
 </html>
