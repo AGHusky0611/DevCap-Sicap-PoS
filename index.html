@@ -92,29 +92,22 @@
     <script src="https://www.gstatic.com/firebasejs/9.6.7/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.7/firebase-firestore-compat.js"></script>
 
-    <script type="module">
-  // Import the functions you need from the SDKs you need
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-app.js";
-  import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-analytics.js";
-  // TODO: Add SDKs for Firebase products that you want to use
-  // https://firebase.google.com/docs/web/setup#available-libraries
+    <script>
+      // Your web app's Firebase configuration
+      const firebaseConfig = {
+        apiKey: "AIzaSyDP_TDz3lPQUoNg-I-1JFUokrVTTthhc58",
+        authDomain: "devcap-pos-sicap.firebaseapp.com",
+        projectId: "devcap-pos-sicap",
+        storageBucket: "devcap-pos-sicap.appspot.com",
+        messagingSenderId: "303088109012",
+        appId: "1:303088109012:web:5a97e12adcfa6b9285c241"
+      };
 
-  // Your web app's Firebase configuration
-  // For Firebase JS SDK v7.20.0 and later, measurementId is optional
-  const firebaseConfig = {
-    apiKey: "AIzaSyDP_TDz3lPQUoNg-I-1JFUokrVTTthhc58",
-    authDomain: "devcap-pos-sicap.firebaseapp.com",
-    projectId: "devcap-pos-sicap",
-    storageBucket: "devcap-pos-sicap.appspot.com",
-    messagingSenderId: "303088109012",
-    appId: "1:303088109012:web:5a97e12adcfa6b9285c241"
-  };
-
-  // Initialize Firebase
-  firebase.initializeApp(firebaseConfig);
-  // Create the global 'db' variable by REMOVING 'const'
-  db = firebase.firestore();
-</script>
+      // Initialize Firebase
+      firebase.initializeApp(firebaseConfig);
+      // Create the global 'db' variable so script.js can access it
+      db = firebase.firestore();
+    </script>
 
     <script src="public/js/script.js"></script>
 </body>
