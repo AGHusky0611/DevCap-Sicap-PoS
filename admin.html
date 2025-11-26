@@ -24,10 +24,16 @@
             <h2>Add New Product</h2>
             <form id="add-product-form">
                 <input type="text" id="product-name-input" placeholder="Product Name" required>
-                <input type="number" id="product-price-input" placeholder="Price" step="any" required>
-                <input type="text" id="product-image-input" placeholder="Image Path (e.g., res/new.jpg)" required>
-                <button type="submit">Save Product</button>
+                <input type="number" id="product-price-input" placeholder="Price" step="0.01" required>
+                <input type="text" id="product-image-input" placeholder="Image Path (e.g., res/image.png)" required>
+                <button type="submit">Add Product</button>
             </form>
+        </div>
+
+        <div class="admin-card">
+            <h2>Database Management</h2>
+            <button id="download-db-btn" class="download-btn">Download Products as CSV</button>
+            <button id="download-sales-btn" class="download-btn sales">Download Sales Report</button>
         </div>
 
         <div class="admin-card">

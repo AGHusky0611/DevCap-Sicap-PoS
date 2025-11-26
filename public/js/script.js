@@ -25,7 +25,7 @@ applyTheme(savedTheme);
 
 // 1. Import the functions you need from the SDKs
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+import { getFirestore, collection, getDocs, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
 // 2. Your web app's Firebase configuration
 const firebaseConfig = {
@@ -43,7 +43,6 @@ const db = getFirestore(app);
 
 // --- Global State ---
 let cart = [];
-let allPurchases = [];
 
 // --- DOM Elements ---
 const productListEl = document.getElementById('product-list');
@@ -57,7 +56,6 @@ const checkoutBtn = document.getElementById('checkout-btn');
 const overlay = document.getElementById('overlay');
 const officerNameInput = document.getElementById('officer-name');
 const officerError = document.getElementById('officer-error');
-const downloadReportBtn = document.getElementById('download-report-btn');
 
 
 // --- Product Display ---
@@ -176,7 +174,7 @@ overlay.addEventListener('click', closeCart);
 
 // --- Checkout & Reporting Logic ---
 
-checkoutBtn.addEventListener('click', () => {
+checkoutBtn.addEventListener('click', async () => {
     const officerName = officerNameInput.value.trim();
 
     // 1. Validate Officer Name
@@ -193,52 +191,34 @@ checkoutBtn.addEventListener('click', () => {
         return;
     }
 
-    // 3. Record Purchase with Officer Name
-    const purchaseDate = new Date().toLocaleString();
-    for (const item of cart) {
-        allPurchases.push({
-            date: purchaseDate,
-            name: item.name,
-            price: item.price,
-            officer: officerName // Add officer name to each purchased item
-        });
+    // 3. Prepare sale data
+    const items = aggregateCart();
+    const totalAmount = items.reduce((sum, item) => sum + item.subtotal, 0);
+
+    const saleData = {
+        officerName: officerName,
+        items: items, // Contains name, price, qty, subtotal
+        totalAmount: totalAmount,
+        createdAt: serverTimestamp() // Adds a server-side timestamp
+    };
+
+    // 4. Save the transaction to Firestore
+    try {
+        const salesCollection = collection(db, 'sales');
+        await addDoc(salesCollection, saleData);
+        
+        // 5. Finalize UI
+        alert(`Purchase successful for officer: ${officerName}! The transaction has been saved.`);
+        cart = [];
+        officerNameInput.value = ''; // Clear officer name after checkout
+        updateCartCount();
+        closeCart();
+
+    } catch (error) {
+        console.error("Error saving transaction: ", error);
+        alert('There was an error saving the transaction. Please try again.');
     }
-
-    // 4. Finalize
-    alert(`Purchase successful for officer: ${officerName}! It has been recorded for the next sales report.`);
-    cart = [];
-    officerNameInput.value = ''; // Clear officer name after checkout
-    updateCartCount();
-    closeCart();
 });
-
-// Update Report Download to include officer name
-if (downloadReportBtn) {
-    downloadReportBtn.addEventListener('click', () => {
-        if (allPurchases.length === 0) { // Corrected typo from source
-            alert('There are no sales to report.');
-            return;
-        }
-    
-        const headers = "Date,Product Name,Product Price,Officer\n"; // Added Officer header
-        const rows = allPurchases.map(p => `"${p.date}","${p.name}",${p.price.toFixed(2)},"${p.officer}"`).join('\n'); // Added officer to row
-        const csvContent = headers + rows;
-    
-        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-        const link = document.createElement("a");
-        const url = URL.createObjectURL(blob);
-        link.setAttribute("href", url);
-        const filename = `sales-report-${new Date().toISOString().slice(0, 10)}.csv`;
-        link.setAttribute("download", filename);
-        link.style.visibility = 'hidden';
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-    
-        alert(`Sales report downloaded as ${filename}. The local sales record has been cleared.`);
-        allPurchases = [];
-    });
-}
 
 
 // --- Initial Load ---

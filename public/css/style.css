@@ -418,6 +418,8 @@ input:checked + .slider:before {
     border-radius: var(--border-radius);
     border: 1px solid var(--border-color);
     font-size: 1rem;
+    background-color: var(--background-color);
+    color: var(--text-color);
 }
 #add-product-form button {
     padding: 12px;
@@ -428,15 +430,53 @@ input:checked + .slider:before {
     border-radius: var(--border-radius);
     cursor: pointer;
 }
+.download-btn {
+    width: 100%;
+    padding: 12px;
+    font-size: 1rem;
+    background-color: #28a745;
+    color: white;
+    border: none;
+    border-radius: var(--border-radius);
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+.download-btn:hover {
+    background-color: #218838;
+}
+.download-btn.sales {
+    background-color: var(--primary-color);
+    margin-top: 12px; /* Add some space between buttons */
+}
+.download-btn.sales:hover {
+    background-color: var(--primary-hover);
+}
+
 #admin-product-list .product-row {
-    display: flex;
-    justify-content: space-between;
+    display: grid;
+    grid-template-columns: 1fr 100px 80px;
+    gap: 16px;
     align-items: center;
     padding: 12px 0;
     border-bottom: 1px solid var(--border-color);
 }
 #admin-product-list .product-row:last-child {
     border-bottom: none;
+}
+.product-row .product-name {
+    font-weight: 600;
+}
+.product-row .product-price {
+    color: var(--muted-text);
+}
+.delete-btn {
+    background-color: var(--danger-color);
+    color: white;
+    border: none;
+    border-radius: var(--border-radius);
+    padding: 8px 12px;
+    cursor: pointer;
+    text-align: center;
 }
 
 /* --- Responsive Design --- */
