@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SICAP Aloha</title>
+    <style>
+        :root {
+            --primary-color: #007bff;
+            --success-color: #28a745;
+            --danger-color: #dc3545;
+            --light-gray: #f8f9fa;
+            --gray: #6c757d;
+            --dark-gray: #343a40;
+            --border-color: #dee2e6;
+            --shadow: 0 4px 6px rgba(0,0,0,0.07);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            margin: 0;
+            background-color: var(--light-gray);
+            color: var(--dark-gray);
+            line-height: 1.6;
+        }
+
+        header {
+            background-color: #fff;
+            display: flex;
+            align-items: center;
+            padding: 10px 25px;
+            border-bottom: 1px solid var(--border-color);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.04);
+            position: sticky;
+            top: 0;
+            z-index: 900;
+        }
+        .logo {
+            width: 45px;
+            height: 45px;
+            margin-right: 15px;
+        }
+        header h1 {
+            margin: 0;
+            flex: 1;
+            font-size: 1.5em;
+        }
+
+        .cart-button {
+            background: var(--primary-color);
+            color: #fff;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.95em;
+            transition: background-color 0.2s;
+        }
+        .cart-button:hover {
+            background-color: #0056b3;
+        }
+        @keyframes shake {
+            10%, 90% { transform: translate3d(-1px, 0, 0); }
+            20%, 80% { transform: translate3d(2px, 0, 0); }
+            30%, 50%, 70% { transform: translate3d(-3px, 0, 0); }
+            40%, 60% { transform: translate3d(3px, 0, 0); }
+        }
+        .cart-button.item-added {
+            animation: shake 0.5s ease;
+        }
+        .cart-count {
+            background: var(--danger-color);
+            color: #fff;
+            font-weight: bold;
+            border-radius: 50%;
+            width: 22px;
+            height: 22px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8em;
+        }
+
+        main {
+            padding: 20px;
+            flex-grow: 1;
+            max-width: 900px;
+            width: 100%;
+            margin: 20px auto;
+        }
+
+        .product-row {
+            display: flex;
+            align-items: center;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: var(--shadow);
+            margin-bottom: 20px;
+            transition: transform 0.2s, box-shadow 0.2s;
+            position: relative; /* Required for positioning the notification */
+        }
+        .product-row:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.09);
+        }
+
+        .product-image-placeholder {
+            width: 80px;
+            height: 80px;
+            border-radius: 8px;
+            border: none;
+            background-color: #f0f0f0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #aaa;
+            margin-right: 20px;
+            overflow: hidden;
+            flex-shrink: 0;
+        }
+        .product-image-placeholder img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .product-name {
+            flex-grow: 1;
+            font-size: 1.2em;
+            font-weight: 500;
+        }
+        .product-details {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+        .product-price {
+            font-weight: bold;
+            min-width: 80px;
+            text-align: right;
+            font-size: 1.1em;
+            color: var(--dark-gray);
+        }
+        .add-to-cart-btn {
+            padding: 10px 20px;
+            cursor: pointer;
+            border: 1px solid var(--primary-color);
+            background-color: var(--primary-color);
+            color: #fff;
+            border-radius: 8px;
+            font-weight: 500;
+            transition: background-color 0.2s, border-color 0.2s;
+        }
+        .add-to-cart-btn:hover {
+            background-color: #0056b3;
+            border-color: #0056b3;
+        }
+
+        /* Notification Pop-up Styles */
+        @keyframes fadeInOut {
+            0% { opacity: 0; transform: translate(-20px, -50%); }
+            15% { opacity: 1; transform: translate(0, -50%); }
+            85% { opacity: 1; transform: translate(0, -50%); }
+            100% { opacity: 0; transform: translate(20px, -50%); }
+        }
+
+        .add-notification {
+            position: absolute;
+            left: 100%;
+            top: 50%;
+            margin-left: 15px;
+            background-color: var(--success-color);
+            color: white;
+            padding: 6px 12px;
+            border-radius: 5px;
+            font-size: 0.9em;
+            font-weight: 500;
+            animation: fadeInOut 1.5s ease-in-out forwards;
+            pointer-events: none; /* Prevents interaction with the pop-up */
+            white-space: nowrap;
+        }
+
+        .cart-panel {
+            position: fixed;
+            right: 0;
+            top: 0;
+            height: 100%;
+            width: 380px;
+            background: #fff;
+            border-left: 1px solid var(--border-color);
+            box-shadow: -4px 0 12px rgba(0,0,0,0.1);
+            transform: translateX(100%);
+            transition: transform 0.3s cubic-bezier(0.7, 0, 0.3, 1);
+            display: flex;
+            flex-direction: column;
+            z-index: 1000;
+        }
+        .cart-panel.open {
+            transform: translateX(0);
+        }
+        .cart-header {
+            padding: 20px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 1.2em;
+            font-weight: 600;
+        }
+        .close-cart-btn {
+            background: transparent;
+            border: none;
+            font-size: 1.8em;
+            cursor: pointer;
+            line-height: 1;
+            color: var(--gray);
+            padding: 0 5px;
+            transition: color 0.2s;
+        }
+        .close-cart-btn:hover {
+            color: var(--dark-gray);
+        }
+        .cart-body {
+            padding: 10px 20px;
+            overflow-y: auto;
+            flex: 1;
+        }
+        .cart-item {
+            display: flex;
+            align-items: center;
+            padding: 15px 0;
+            border-bottom: 1px solid #f0f0f0;
+            gap: 15px;
+        }
+        .cart-item:last-child {
+            border-bottom: none;
+        }
+        .cart-item .left {
+            flex: 1;
+        }
+        .qty-controls {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            border: 1px solid var(--border-color);
+            border-radius: 5px;
+            padding: 2px;
+        }
+        .qty-controls button {
+            background: transparent;
+            border: none;
+            width: 28px;
+            height: 28px;
+            cursor: pointer;
+            font-size: 1.2em;
+            color: var(--gray);
+            transition: color 0.2s;
+        }
+        .qty-controls button:hover {
+            color: var(--dark-gray);
+        }
+        .qty-controls span {
+            min-width: 20px;
+            text-align: center;
+            font-weight: 500;
+        }
+        .remove-btn {
+            background: none;
+            border: none;
+            color: var(--primary-color);
+            cursor: pointer;
+            text-decoration: underline;
+            padding: 0;
+            font-size: 0.9em;
+            margin-top: 4px;
+        }
+        .remove-btn:hover {
+            color: var(--danger-color);
+        }
+        .cart-empty {
+            text-align: center;
+            color: var(--gray);
+            padding: 40px 0;
+            font-size: 1.1em;
+        }
+        .cart-footer {
+            padding: 20px;
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            background: #fff;
+        }
+        .cart-total-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 1.2em;
+            font-weight: 600;
+        }
+        .checkout-btn {
+            padding: 15px;
+            font-size: 1.1em;
+            font-weight: bold;
+            cursor: pointer;
+            background-color: var(--success-color);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            transition: background-color 0.2s;
+            text-align: center;
+        }
+        .checkout-btn:hover {
+            background-color: #218838;
+        }
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.4);
+            z-index: 999;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s, visibility 0.3s;
+        }
+        .overlay.visible {
+            opacity: 1;
+            visibility: visible;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="logo">
+            <img src="../res/SICAP.png" alt="SicapLogo" style="max-width: 100%; max-height: 100%;">
+        </div>
+        <h1>SICAP Aloha</h1>
+        <button class="cart-button" id="open-cart-btn" aria-label="Open cart">
+            Cart <span class="cart-count" id="cart-count">0</span>
+        </button>
+    </header>
+
+    <main>
+        <!-- Product Items -->
+        <div class="product-row">
+            <div class="product-image-placeholder"><img src="../res/CC.jpg" alt="Chocolate Cookie"></div>
+            <div class="product-name">Chocolate Cookie</div>
+            <div class="product-details">
+                <div class="product-price">₱20.00</div>
+                <button class="add-to-cart-btn">Add to Cart</button>
+            </div>
+        </div>
+        <div class="product-row">
+            <div class="product-image-placeholder"><img src="../res/Velvet.png" alt="Red Velvet Cookie"></div>
+            <div class="product-name">Red Velvet Cookie</div>
+            <div class="product-details">
+                <div class="product-price">₱20.00</div>
+                <button class="add-to-cart-btn">Add to Cart</button>
+            </div>
+        </div>
+        <div class="product-row">
+            <div class="product-image-placeholder"><img src="../res/matcha.jpg" alt="Matcha Cookie"></div>
+            <div class="product-name">Matcha Cookie</div>
+            <div class="product-details">
+                <div class="product-price">₱20.00</div>
+                <button class="add-to-cart-btn">Add to Cart</button>
+            </div>
+        </div>
+        <div class="product-row">
+            <div class="product-image-placeholder"><img src="../res/oatmeal.jpg" alt="Oats Cookie"></div>
+            <div class="product-name">Oats Cookie</div>
+            <div class="product-details">
+                <div class="product-price">₱20.00</div>
+                <button class="add-to-cart-btn">Add to Cart</button>
+            </div>
+        </div>
+        <div class="product-row">
+            <div class="product-image-placeholder"><img src="../res/FruitCups.jpg" alt="Fruit Cups"></div>
+            <div class="product-name">Fruit Cups</div>
+            <div class="product-details">
+                <div class="product-price">₱50.00</div>
+                <button class="add-to-cart-btn">Add to Cart</button>
+            </div>
+        </div>
+        <div class="product-row">
+            <div class="product-image-placeholder">Image</div>
+            <div class="product-name">Juice</div>
+            <div class="product-details">
+                <div class="product-price">₱20.00</div>
+                <button class="add-to-cart-btn">Add to Cart</button>
+            </div>
+        </div>
+    </main>
+
+    <aside class="cart-panel" id="cart-panel" aria-hidden="true">
+        <div class="cart-header">
+            <div>Your Cart</div>
+            <button id="close-cart-btn" class="close-cart-btn" aria-label="Close cart">&times;</button>
+        </div>
+        <div class="cart-body" id="cart-body">
+            <div class="cart-empty" id="cart-empty">Your cart is empty.</div>
+        </div>
+        <div class="cart-footer">
+            <div class="cart-total-row">
+                <div>Total:</div>
+                <div id="cart-total">₱0.00</div>
+            </div>
+            <button class="checkout-btn" id="checkout-btn">Checkout</button>
+        </div>
+    </aside>
+
+    <div class="overlay" id="overlay"></div>
+
+    <script>
+        let cart = [];
+
+        const addToCartButtons = document.querySelectorAll('.add-to-cart-btn');
+        const openCartBtn = document.getElementById('open-cart-btn');
+        const closeCartBtn = document.getElementById('close-cart-btn');
+        const cartPanel = document.getElementById('cart-panel');
+        const cartCountEl = document.getElementById('cart-count');
+        const cartBody = document.getElementById('cart-body');
+        const cartEmptyEl = document.getElementById('cart-empty');
+        const cartTotalEl = document.getElementById('cart-total');
+        const checkoutBtn = document.getElementById('checkout-btn');
+        const overlay = document.getElementById('overlay');
+
+        function updateCartCount() {
+            cartCountEl.innerText = cart.length;
+        }
+
+        function aggregateCart() {
+            const map = new Map();
+            cart.forEach(item => {
+                const key = `${item.name}||${item.price}`;
+                if (!map.has(key)) map.set(key, { name: item.name, price: item.price, qty: 0 });
+                const entry = map.get(key);
+                entry.qty += 1;
+            });
+            return Array.from(map.values()).map(e => ({ ...e, subtotal: e.price * e.qty }));
+        }
+
+        function renderCart() {
+            const items = aggregateCart();
+            cartBody.innerHTML = '';
+            if (items.length === 0) {
+                cartBody.appendChild(cartEmptyEl);
+                cartTotalEl.innerText = '₱0.00';
+                return;
+            }
+
+            items.forEach(item => {
+                const itemEl = document.createElement('div');
+                itemEl.className = 'cart-item';
+                itemEl.innerHTML = `
+                    <div class="left">
+                        <div style="font-weight:600">${item.name}</div>
+                        <div style="color:var(--gray); font-size:0.9em">₱${item.price.toFixed(2)}</div>
+                        <button class="remove-btn" data-name="${item.name}" data-price="${item.price}">Remove</button>
+                    </div>
+                    <div style="display:flex;align-items:center;gap:15px">
+                        <div class="qty-controls">
+                            <button class="decrease-btn" data-name="${item.name}" data-price="${item.price}">-</button>
+                            <span>${item.qty}</span>
+                            <button class="increase-btn" data-name="${item.name}" data-price="${item.price}">+</button>
+                        </div>
+                        <div style="font-weight:600;min-width:70px;text-align:right">₱${item.subtotal.toFixed(2)}</div>
+                    </div>`;
+                cartBody.appendChild(itemEl);
+            });
+
+            const total = items.reduce((s, it) => s + it.subtotal, 0);
+            cartTotalEl.innerText = `₱${total.toFixed(2)}`;
+
+            cartBody.querySelectorAll('.increase-btn, .decrease-btn, .remove-btn').forEach(btn => {
+                btn.addEventListener('click', () => handleCartAction(btn));
+            });
+        }
+
+        function handleCartAction(button) {
+            const { name, price: priceStr } = button.dataset;
+            const price = parseFloat(priceStr);
+
+            if (button.classList.contains('increase-btn')) {
+                cart.push({ name, price });
+            } else if (button.classList.contains('decrease-btn')) {
+                const idx = cart.findIndex(i => i.name === name && i.price === price);
+                if (idx !== -1) cart.splice(idx, 1);
+            } else if (button.classList.contains('remove-btn')) {
+                cart = cart.filter(i => !(i.name === name && i.price === price));
+            }
+            updateCartCount();
+            renderCart();
+        }
+
+        addToCartButtons.forEach(button => {
+            button.addEventListener('click', (event) => {
+                const productRow = event.target.closest('.product-row');
+                const productName = productRow.querySelector('.product-name').innerText;
+                const productPrice = parseFloat(productRow.querySelector('.product-price').innerText.replace('₱', ''));
+
+                cart.push({ name: productName, price: productPrice });
+                updateCartCount();
+
+                // Show "Added!" notification
+                const existingNotification = productRow.querySelector('.add-notification');
+                if (existingNotification) existingNotification.remove();
+
+                const notification = document.createElement('div');
+                notification.className = 'add-notification';
+                notification.innerText = 'Added!';
+                productRow.appendChild(notification);
+
+                // Remove the notification after the animation ends
+                setTimeout(() => {
+                    notification.remove();
+                }, 1500); // This duration should match the animation duration
+
+                openCartBtn.classList.add('item-added');
+                setTimeout(() => openCartBtn.classList.remove('item-added'), 500);
+
+                if (cartPanel.classList.contains('open')) renderCart();
+            });
+        });
+
+        const openCart = () => {
+            cartPanel.classList.add('open');
+            overlay.classList.add('visible');
+            renderCart();
+        };
+
+        const closeCart = () => {
+            cartPanel.classList.remove('open');
+            overlay.classList.remove('visible');
+        };
+
+        openCartBtn.addEventListener('click', openCart);
+        closeCartBtn.addEventListener('click', closeCart);
+        overlay.addEventListener('click', closeCart);
+
+        checkoutBtn.addEventListener('click', () => {
+            if (cart.length === 0) {
+                alert('Your cart is empty.');
+                return;
+            }
+
+            let csvContent = "Product Name,Price,Purchase Date\n";
+            const purchaseDate = new Date().toLocaleString();
+            cart.forEach(item => {
+                csvContent += `"${item.name}",${item.price.toFixed(2)},"${purchaseDate}"\n`;
+            });
+
+            const link = document.createElement('a');
+            link.setAttribute('href', 'data:text/csv;charset=utf-8,' + encodeURI(csvContent));
+            link.setAttribute('download', `sicap-purchase-${new Date().toISOString().slice(0,10)}.csv`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+
+            alert('Purchase successful! A summary file has been downloaded.');
+
+            cart = [];
+            updateCartCount();
+            closeCart();
+        });
+
+        updateCartCount();
+    </script>
+</body>
+</html>
