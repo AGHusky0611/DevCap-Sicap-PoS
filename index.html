@@ -105,15 +105,15 @@
     apiKey: "AIzaSyDP_TDz3lPQUoNg-I-1JFUokrVTTthhc58",
     authDomain: "devcap-pos-sicap.firebaseapp.com",
     projectId: "devcap-pos-sicap",
-    storageBucket: "devcap-pos-sicap.firebasestorage.app",
+    storageBucket: "devcap-pos-sicap.appspot.com",
     messagingSenderId: "303088109012",
-    appId: "1:303088109012:web:5a97e12adcfa6b9285c241",
-    measurementId: "G-YYEKYVDEKS"
+    appId: "1:303088109012:web:5a97e12adcfa6b9285c241"
   };
 
   // Initialize Firebase
-  const app = initializeApp(firebaseConfig);
-  const analytics = getAnalytics(app);
+  firebase.initializeApp(firebaseConfig);
+  // Create the global 'db' variable by REMOVING 'const'
+  db = firebase.firestore();
 </script>
 
     <script src="public/js/script.js"></script>
