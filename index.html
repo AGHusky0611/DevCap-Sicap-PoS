@@ -4,12 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SICAP Aloha</title>
-    <link rel="stylesheet" href="css/style.css">
+    <!-- Path updated to point into the public folder -->
+    <link rel="stylesheet" href="public/css/style.css">
 </head>
 <body>
     <header>
         <div class="logo">
-            <img src="../res/SICAP.png" alt="SicapLogo" style="max-width: 100%; max-height: 100%;">
+            <!-- Path updated to remove ../ -->
+            <img src="res/SICAP.png" alt="SicapLogo" style="max-width: 100%; max-height: 100%;">
         </div>
         <h1>SICAP Aloha</h1>
         <button class="cart-button" id="open-cart-btn" aria-label="Open cart">
@@ -20,7 +22,7 @@
     <main>
         <!-- Product Items -->
         <div class="product-row">
-            <div class="product-image-placeholder"><img src="../res/CC.jpg" alt="Chocolate Cookie"></div>
+            <div class="product-image-placeholder"><img src="res/CC.jpg" alt="Chocolate Cookie"></div>
             <div class="product-name">Chocolate Cookie</div>
             <div class="product-details">
                 <div class="product-price">₱20.00</div>
@@ -28,7 +30,7 @@
             </div>
         </div>
         <div class="product-row">
-            <div class="product-image-placeholder"><img src="../res/Velvet.png" alt="Red Velvet Cookie"></div>
+            <div class="product-image-placeholder"><img src="res/Velvet.png" alt="Red Velvet Cookie"></div>
             <div class="product-name">Red Velvet Cookie</div>
             <div class="product-details">
                 <div class="product-price">₱20.00</div>
@@ -36,7 +38,7 @@
             </div>
         </div>
         <div class="product-row">
-            <div class="product-image-placeholder"><img src="../res/matcha.jpg" alt="Matcha Cookie"></div>
+            <div class="product-image-placeholder"><img src="res/matcha.jpg" alt="Matcha Cookie"></div>
             <div class="product-name">Matcha Cookie</div>
             <div class="product-details">
                 <div class="product-price">₱20.00</div>
@@ -44,7 +46,7 @@
             </div>
         </div>
         <div class="product-row">
-            <div class="product-image-placeholder"><img src="../res/oatmeal.jpg" alt="Oats Cookie"></div>
+            <div class="product-image-placeholder"><img src="res/oatmeal.jpg" alt="Oats Cookie"></div>
             <div class="product-name">Oats Cookie</div>
             <div class="product-details">
                 <div class="product-price">₱20.00</div>
@@ -52,7 +54,7 @@
             </div>
         </div>
         <div class="product-row">
-            <div class="product-image-placeholder"><img src="../res/FruitCups.jpg" alt="Fruit Cups"></div>
+            <div class="product-image-placeholder"><img src="res/FruitCups.jpg" alt="Fruit Cups"></div>
             <div class="product-name">Fruit Cups</div>
             <div class="product-details">
                 <div class="product-price">₱50.00</div>
@@ -88,6 +90,27 @@
 
     <div class="overlay" id="overlay"></div>
 
-    <script src="js/script.js"></script>
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.7/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.7/firebase-firestore-compat.js"></script>
+
+    <script>
+      // Your web app's Firebase configuration
+      const firebaseConfig = {
+        apiKey: "YOUR_API_KEY",
+        authDomain: "YOUR_AUTH_DOMAIN",
+        projectId: "YOUR_PROJECT_ID",
+        storageBucket: "YOUR_STORAGE_BUCKET",
+        messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+        appId: "YOUR_APP_ID"
+      };
+
+      // Initialize Firebase
+      firebase.initializeApp(firebaseConfig);
+      const db = firebase.firestore();
+    </script>
+
+    <!-- Path updated to point into the public folder -->
+    <script src="public/js/script.js"></script>
 </body>
 </html>

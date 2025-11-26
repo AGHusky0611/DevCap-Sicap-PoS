@@ -130,24 +130,30 @@ checkoutBtn.addEventListener('click', () => {
         return;
     }
 
-    let csvContent = "Product Name,Price,Purchase Date\n";
-    const purchaseDate = new Date().toLocaleString();
-    cart.forEach(item => {
-        csvContent += `"${item.name}",${item.price.toFixed(2)},"${purchaseDate}"\n`;
-    });
+    const total = aggregateCart().reduce((sum, item) => sum + item.subtotal, 0);
 
-    const link = document.createElement('a');
-    link.setAttribute('href', 'data:text/csv;charset=utf-8,' + encodeURI(csvContent));
-    link.setAttribute('download', `sicap-purchase-${new Date().toISOString().slice(0,10)}.csv`);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    // Create a purchase record object
+    const purchaseRecord = {
+        items: cart,
+        totalAmount: total,
+        purchaseDate: new Date() // Firebase will convert this to a timestamp
+    };
 
-    alert('Purchase successful! A summary file has been downloaded.');
+    // Add a new document with a generated ID to the "purchases" collection
+    db.collection("purchases").add(purchaseRecord)
+        .then((docRef) => {
+            console.log("Document written with ID: ", docRef.id);
+            alert('Purchase successful! Your order has been recorded.');
 
-    cart = [];
-    updateCartCount();
-    closeCart();
+            // Clear cart and update UI on success
+            cart = [];
+            updateCartCount();
+            closeCart();
+        })
+        .catch((error) => {
+            console.error("Error adding document: ", error);
+            alert('There was an error saving your purchase. Please try again.');
+        });
 });
 
 updateCartCount();
