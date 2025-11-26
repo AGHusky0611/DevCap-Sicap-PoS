@@ -41,7 +41,115 @@ header h1 {
     margin: 0;
     flex: 1;
     font-size: 1.5em;
+    text-align: center;
 }
+
+.admin-link {
+    background: transparent;
+    border: 1px solid var(--gray);
+    color: var(--gray);
+    padding: 8px 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    margin-right: 15px;
+    transition: all 0.2s;
+    text-decoration: none;
+    font-size: 0.9em;
+}
+.admin-link:hover {
+    background: var(--light-gray);
+    color: var(--dark-gray);
+}
+
+/* --- Admin Page Specific Styles --- */
+.admin-container {
+    max-width: 900px;
+    margin: 30px auto;
+    padding: 0 20px;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 30px;
+}
+
+@media (min-width: 768px) {
+    .admin-container {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+.admin-card {
+    background: #fff;
+    padding: 25px;
+    border-radius: 8px;
+    box-shadow: var(--shadow);
+}
+.admin-card h2 {
+    margin-top: 0;
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 15px;
+    margin-bottom: 20px;
+}
+
+#add-product-form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+#add-product-form input {
+    padding: 12px;
+    border: 1px solid var(--border-color);
+    border-radius: 5px;
+    font-size: 1em;
+}
+#add-product-form button {
+    padding: 12px;
+    cursor: pointer;
+    border: none;
+    background-color: var(--success-color);
+    color: #fff;
+    border-radius: 8px;
+    font-weight: 500;
+    font-size: 1em;
+}
+
+#admin-product-list {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.admin-product-row {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 10px;
+    border: 1px solid var(--border-color);
+    border-radius: 5px;
+}
+.admin-product-image {
+    width: 50px;
+    height: 50px;
+    object-fit: cover;
+    border-radius: 5px;
+}
+.admin-product-name {
+    flex: 1;
+    font-weight: 600;
+}
+.admin-product-price {
+    color: var(--gray);
+}
+.admin-product-row .remove-product-btn {
+    background-color: var(--danger-color);
+    color: white;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+
+/* --- End Admin Styles --- */
 
 .cart-button {
     background: var(--primary-color);
@@ -328,4 +436,31 @@ main {
 .overlay.visible {
     opacity: 1;
     visibility: visible;
+}
+
+#add-product-form button {
+    padding: 10px 20px;
+    cursor: pointer;
+    border: none;
+    background-color: var(--success-color);
+    color: #fff;
+    border-radius: 8px;
+    font-weight: 500;
+}
+
+#download-report-btn {
+    width: 100%;
+    padding: 12px;
+    font-size: 1em;
+    cursor: pointer;
+    border: 1px solid var(--primary-color);
+    background-color: transparent;
+    color: var(--primary-color);
+    border-radius: 8px;
+    font-weight: 500;
+    transition: all 0.2s;
+}
+#download-report-btn:hover {
+    background-color: var(--primary-color);
+    color: white;
 }

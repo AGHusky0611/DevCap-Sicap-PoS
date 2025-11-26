@@ -12,61 +12,14 @@
             <img src="res/SICAP.png" alt="SicapLogo" style="max-width: 100%; max-height: 100%;">
         </div>
         <h1>SICAP Aloha</h1>
+        <a href="admin.html" class="admin-link">Manage Products</a>
         <button class="cart-button" id="open-cart-btn" aria-label="Open cart">
             Cart <span class="cart-count" id="cart-count">0</span>
         </button>
     </header>
 
-    <main>
-        <!-- Product Items -->
-        <div class="product-row">
-            <div class="product-image-placeholder"><img src="res/CC.jpg" alt="Chocolate Cookie"></div>
-            <div class="product-name">Chocolate Cookie</div>
-            <div class="product-details">
-                <div class="product-price">₱20.00</div>
-                <button class="add-to-cart-btn">Add to Cart</button>
-            </div>
-        </div>
-        <div class="product-row">
-            <div class="product-image-placeholder"><img src="res/Velvet.png" alt="Red Velvet Cookie"></div>
-            <div class="product-name">Red Velvet Cookie</div>
-            <div class="product-details">
-                <div class="product-price">₱20.00</div>
-                <button class="add-to-cart-btn">Add to Cart</button>
-            </div>
-        </div>
-        <div class="product-row">
-            <div class="product-image-placeholder"><img src="res/matcha.jpg" alt="Matcha Cookie"></div>
-            <div class="product-name">Matcha Cookie</div>
-            <div class="product-details">
-                <div class="product-price">₱20.00</div>
-                <button class="add-to-cart-btn">Add to Cart</button>
-            </div>
-        </div>
-        <div class="product-row">
-            <div class="product-image-placeholder"><img src="res/oatmeal.jpg" alt="Oats Cookie"></div>
-            <div class="product-name">Oats Cookie</div>
-            <div class="product-details">
-                <div class="product-price">₱20.00</div>
-                <button class="add-to-cart-btn">Add to Cart</button>
-            </div>
-        </div>
-        <div class="product-row">
-            <div class="product-image-placeholder"><img src="res/FruitCups.jpg" alt="Fruit Cups"></div>
-            <div class="product-name">Fruit Cups</div>
-            <div class="product-details">
-                <div class="product-price">₱50.00</div>
-                <button class="add-to-cart-btn">Add to Cart</button>
-            </div>
-        </div>
-        <div class="product-row">
-            <div class="product-image-placeholder">Image</div>
-            <div class="product-name">Juice</div>
-            <div class="product-details">
-                <div class="product-price">₱20.00</div>
-                <button class="add-to-cart-btn">Add to Cart</button>
-            </div>
-        </div>
+    <main id="product-list">
+        <!-- Products will be loaded here dynamically from Firestore -->
     </main>
 
     <aside class="cart-panel" id="cart-panel" aria-hidden="true">
@@ -90,6 +43,5 @@
 
     <!-- Load script.js as a module -->
     <script type="module" src="public/js/script.js"></script>
-
 </body>
 </html>
