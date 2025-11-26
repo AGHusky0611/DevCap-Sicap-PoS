@@ -25,6 +25,14 @@
         </button>
     </header>
 
+    <div class="controls-container">
+        <input type="search" id="search-input" placeholder="Search for products...">
+        <div class="sort-buttons">
+            <button class="sort-btn" id="sort-name-btn" data-sort="name">Sort by Name (A-Z)</button>
+            <button class="sort-btn" id="sort-price-btn" data-sort="price">Sort by Price (Low-High)</button>
+        </div>
+    </div>
+
     <main id="product-list">
         <!-- Products will be loaded here dynamically from Firestore -->
     </main>

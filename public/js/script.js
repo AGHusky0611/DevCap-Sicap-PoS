@@ -43,6 +43,8 @@ const db = getFirestore(app);
 
 // --- Global State ---
 let cart = [];
+let allProducts = []; // To store a master copy of all products
+let currentSort = { key: 'name', direction: 'asc' }; // Default sort
 
 // --- DOM Elements ---
 const productListEl = document.getElementById('product-list');
@@ -56,18 +58,22 @@ const checkoutBtn = document.getElementById('checkout-btn');
 const overlay = document.getElementById('overlay');
 const officerNameInput = document.getElementById('officer-name');
 const officerError = document.getElementById('officer-error');
+const searchInput = document.getElementById('search-input');
+const sortNameBtn = document.getElementById('sort-name-btn');
+const sortPriceBtn = document.getElementById('sort-price-btn');
 
+// --- Product Display & Filtering ---
 
-// --- Product Display ---
-
-async function renderProducts() {
+// New function to render a list of products to the DOM
+function displayProducts(productsToDisplay) {
     productListEl.innerHTML = '';
-    const productsCol = collection(db, 'products');
-    const productSnapshot = await getDocs(productsCol);
-    productSnapshot.forEach(doc => {
-        const product = doc.data();
+    if (productsToDisplay.length === 0) {
+        productListEl.innerHTML = '<p style="text-align:center; grid-column: 1 / -1;">No products match your search.</p>';
+        return;
+    }
+    productsToDisplay.forEach(product => {
         const productEl = document.createElement('div');
-        productEl.className = 'product-card'; // Using new class for styling
+        productEl.className = 'product-card';
         productEl.innerHTML = `
             <img src="${product.imageUrl}" alt="${product.name}">
             <div class="product-name">${product.name}</div>
@@ -80,6 +86,87 @@ async function renderProducts() {
     });
 }
 
+// Main function to apply current filters and sorting
+function updateDisplay() {
+    let filteredProducts = [...allProducts];
+    const searchTerm = searchInput.value.toLowerCase();
+
+    // 1. Apply Search Filter
+    if (searchTerm) {
+        filteredProducts = filteredProducts.filter(p => 
+            p.name.toLowerCase().includes(searchTerm)
+        );
+    }
+
+    // 2. Apply Sorting
+    const { key, direction } = currentSort;
+    filteredProducts.sort((a, b) => {
+        if (key === 'name') {
+            return a.name.localeCompare(b.name);
+        } else if (key === 'price') {
+            return a.price - b.price;
+        }
+        return 0;
+    });
+
+    if (direction === 'desc') {
+        filteredProducts.reverse();
+    }
+    
+    // 3. Render the final list
+    displayProducts(filteredProducts);
+}
+
+// Fetches products from Firestore ONCE and stores them
+async function fetchAndRenderProducts() {
+    productListEl.innerHTML = 'Loading products...';
+    try {
+        const productsCol = collection(db, 'products');
+        const productSnapshot = await getDocs(productsCol);
+        allProducts = productSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        updateDisplay(); // Initial render
+    } catch (error) {
+        console.error("Error fetching products:", error);
+        productListEl.innerHTML = '<p>Error loading products. Please try again later.</p>';
+    }
+}
+
+// --- Event Listeners for Controls ---
+searchInput.addEventListener('input', updateDisplay);
+
+[sortNameBtn, sortPriceBtn].forEach(btn => {
+    btn.addEventListener('click', () => {
+        const sortKey = btn.dataset.sort;
+
+        // Reset other button
+        const otherBtn = sortKey === 'name' ? sortPriceBtn : sortNameBtn;
+        otherBtn.classList.remove('active');
+        otherBtn.innerText = otherBtn.innerText.replace(/ \(.+\)/, '');
+
+
+        if (currentSort.key === sortKey) {
+            // If already sorting by this key, just flip direction
+            currentSort.direction = currentSort.direction === 'asc' ? 'desc' : 'asc';
+        } else {
+            // If switching to a new sort key
+            currentSort.key = sortKey;
+            currentSort.direction = 'asc';
+        }
+        
+        // Update button text and style
+        btn.classList.add('active');
+        if (sortKey === 'name') {
+            btn.innerText = `Sort by Name (${currentSort.direction === 'asc' ? 'A-Z' : 'Z-A'})`;
+        } else {
+            btn.innerText = `Sort by Price (${currentSort.direction === 'asc' ? 'Low-High' : 'High-Low'})`;
+        }
+        
+        updateDisplay();
+    });
+});
+
+
+// --- Add to Cart Logic (no changes needed here) ---
 productListEl.addEventListener('click', (e) => {
     if (e.target.classList.contains('add-to-cart-btn')) {
         const button = e.target;
@@ -126,7 +213,8 @@ productListEl.addEventListener('click', (e) => {
     }
 });
 
-// --- Cart Logic ---
+
+// --- Cart Logic (no changes needed here) ---
 function updateCartCount() { cartCountEl.innerText = cart.length; }
 
 function aggregateCart() {
@@ -254,5 +342,5 @@ checkoutBtn.addEventListener('click', async () => {
 
 
 // --- Initial Load ---
-renderProducts();
+fetchAndRenderProducts(); // Use the new fetch function
 updateCartCount();
